@@ -8,5 +8,5 @@ Dette er frontend-delen af mit eksamensprojekt. Frontenden er lavet med vanilla 
 ## Sådan kører du
 1. **Clone repo**:
    ```bash
-   git clone https://github.com/[organization-name]/exam-frontend.git
+   git clone https://github.com/exam-project-luke/exam-frontend.git
    cd exam-frontend
