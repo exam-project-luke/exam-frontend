@@ -1,29 +1,74 @@
-// app.js
+import { fetchDeliveries, scheduleDelivery, createDrone, addDelivery, markCompleted } from './api.js';
 
-// Wait for the DOM to load
-document.addEventListener('DOMContentLoaded', () => {
-    // Get the button and response div by their IDs
-    const testButton = document.getElementById('test-connection-btn');
-    const responseDiv = document.getElementById('response');
+const deliveryList = document.getElementById('deliveryList');
+const createDroneBtn = document.getElementById('createDroneBtn');
+const createDeliveryBtn = document.getElementById('createDeliveryBtn')
 
-    // Add a click event listener to the test connection button
-    testButton.addEventListener('click', async () => {
-        try {
-            // Show a loading message
-            responseDiv.textContent = 'Checking connection...';
+// Render deliveries in the list
+async function renderDeliveries() {
+    const deliveries = await fetchDeliveries();
+    if (!deliveries) return;
 
-            // Call the API function from api.js
-            const message = await fetchHealthCheck(); // Perform API request
+    deliveryList.innerHTML = ''; // Clear the list
 
-            // Display the backend response in the response div
-            responseDiv.textContent = message;
-            responseDiv.classList.add('text-success');
-            responseDiv.classList.remove('text-danger');
-        } catch (error) {
-            // Handle errors and display them in the response div
-            responseDiv.textContent = 'Failed to connect to backend!';
-            responseDiv.classList.add('text-danger');
-            responseDiv.classList.remove('text-success');
-        }
+    deliveries.forEach((delivery) => {
+        const listItem = document.createElement('li');
+        listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+        listItem.innerHTML = `
+            <div class="col-sm">
+                ${delivery.address} - ${delivery.drone ? 'Drone Assigned' : 'No Drone Assigned'} - ${ new Date(delivery.expectedDeliveryTime).toLocaleString()}
+            </div>
+            <div class="col-sm">
+                <button 
+                    class="btn btn-sm btn-success ${delivery.drone ? 'disabled' : ''}" 
+                    onclick="assignDrone(${delivery.id})"
+                >
+                    Assign Drone
+                </button> 
+            </div>
+            <div>
+                <button 
+                    class="btn btn-sm btn-success ${delivery.drone ? '' : 'disabled'}" 
+                    onclick="markCompleted(${delivery.id})"
+                >
+                    Finish Drone
+                </button>
+            </div>
+        `;
+
+        deliveryList.appendChild(listItem);
+
+
     });
+}
+
+// Assign a drone to a delivery
+window.assignDrone = async (deliveryId) => {
+    await scheduleDelivery(deliveryId);
+    await renderDeliveries(); // Refresh the list after scheduling
+};
+window.markCompleted = async (deliveryId) => {
+    await markCompleted(deliveryId);
+    await renderDeliveries(); // Refresh the list after completing delivery
+};
+
+// Create a new drone
+createDroneBtn.addEventListener('click', async () => {
+    await createDrone();
+    alert('Drone created successfully!');
 });
+
+
+// Create a new drone
+createDeliveryBtn.addEventListener('click', async () => {
+    await addDelivery();
+    alert('Delivery created successfully!');
+    await renderDeliveries();
+});
+
+// Auto-refresh the delivery list every 60 seconds
+setInterval(renderDeliveries, 10000);
+
+// Initial render
+renderDeliveries();
