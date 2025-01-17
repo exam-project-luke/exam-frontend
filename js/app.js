@@ -4,7 +4,6 @@ const deliveryList = document.getElementById('deliveryList');
 const createDroneBtn = document.getElementById('createDroneBtn');
 const createDeliveryBtn = document.getElementById('createDeliveryBtn')
 
-// Render deliveries in the list
 async function renderDeliveries() {
     const deliveries = await fetchDeliveries();
     if (!deliveries) return;
@@ -43,7 +42,6 @@ async function renderDeliveries() {
     });
 }
 
-// Assign a drone to a delivery
 window.assignDrone = async (deliveryId) => {
     await scheduleDelivery(deliveryId);
     await renderDeliveries(); // Refresh the list after scheduling
@@ -53,22 +51,18 @@ window.markCompleted = async (deliveryId) => {
     await renderDeliveries(); // Refresh the list after completing delivery
 };
 
-// Create a new drone
 createDroneBtn.addEventListener('click', async () => {
     await createDrone();
     alert('Drone created successfully!');
 });
 
 
-// Create a new drone
 createDeliveryBtn.addEventListener('click', async () => {
     await addDelivery();
     alert('Delivery created successfully!');
     await renderDeliveries();
 });
 
-// Auto-refresh the delivery list every 60 seconds
 setInterval(renderDeliveries, 10000);
 
-// Initial render
 renderDeliveries();
